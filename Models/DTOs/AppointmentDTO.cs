@@ -19,9 +19,13 @@ public class AppointmentDTO
         get
         {
             decimal total = 0M;
-            foreach (AppointmentDetailDTO AppointmentDetail in AppointmentDetails)
+            // when we get all appointments and AppointmentDetails is not included AppointmentDetails == null
+            if (AppointmentDetails != null)
+            {
+                foreach (AppointmentDetailDTO AppointmentDetail in AppointmentDetails)
             {
                 total += AppointmentDetail.Service.Price;
+            }
             }
             return total;
         }
