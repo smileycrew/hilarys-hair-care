@@ -139,7 +139,10 @@ app.MapGet("/api/appointments", (HillarysHaircareDbContext database) =>
 {
     List<Appointment> appointments = database.Appointments
     .Include((appointment) => appointment.Customer)
-    .Include((appointment) => appointment.Stylist).ToList();
+    .Include((appointment) => appointment.Stylist)
+    .Include((appointment) => appointment.AppointmentDetails)
+        .ThenInclude((appointmentDetail) => appointmentDetail.Service)
+    .ToList();
     return appointments.Select((appointment) => new AppointmentDTO
     {
         Id = appointment.Id,
@@ -158,7 +161,19 @@ app.MapGet("/api/appointments", (HillarysHaircareDbContext database) =>
             Id = appointment.Stylist.Id,
             FirstName = appointment.Stylist.FirstName,
             LastName = appointment.Stylist.LastName
-        }
+        },
+        AppointmentDetails = appointment.AppointmentDetails.Select((ad) => new AppointmentDetailDTO
+        {
+            Id = ad.Id,
+            AppointmentId = ad.AppointmentId,
+            ServiceId = ad.ServiceId,
+            Service = new ServiceDTO
+            {
+                Id = ad.Service.Id,
+                ServiceName = ad.Service.ServiceName,
+                Price = ad.Service.Price
+            }
+        }).ToList()
     });
 });
 
@@ -245,11 +260,12 @@ app.MapPost("/api/appointmentdetails", (HillarysHaircareDbContext database, Appo
 app.MapGet("/api/appointments/{id}", (HillarysHaircareDbContext database,int id) =>
 {
     Appointment appointment = database.Appointments
-    .Include((appointment) => appointment.Customer)
+    .Include((appointment) => appointment.AppointmentDetails)
     .Single((appointment) => appointment.Id == id);
 
     List<AppointmentDetail> appointmentDetails = database.AppointmentDetails
-    .Where((appointmentDetail) => appointmentDetail.AppointmentId == appointment.Id).ToList();
+    .Include((appointmentDetail) => appointmentDetail.Service)
+    .Where((appointmentDetail) => appointmentDetail.AppointmentId == id).ToList();
 
     return new AppointmentDTO
     {
@@ -264,7 +280,13 @@ app.MapGet("/api/appointments/{id}", (HillarysHaircareDbContext database,int id)
         {
             Id = appointmentDetail.Id,
             AppointmentId = appointmentDetail.AppointmentId,
-            ServiceId = appointmentDetail.ServiceId
+            ServiceId = appointmentDetail.ServiceId,
+            Service = new ServiceDTO
+            {
+                Id = appointmentDetail.Service.Id,
+                ServiceName = appointmentDetail.Service.ServiceName,
+                Price = appointmentDetail.Service.Price
+            }
         }).ToList()
     };
 });
@@ -273,10 +295,19 @@ app.MapGet("/api/appointments/{id}", (HillarysHaircareDbContext database,int id)
 
 
 //---------------------------------------------------------------------------
+//delete service from appt
+app.MapDelete("/api/appointmentdetails/{id}", (HillarysHaircareDbContext database, int id) => 
+{
+    AppointmentDetail AppToDelete = database.AppointmentDetails
+    .Single(ad => ad.Id == id);
+
+    database.Remove(AppToDelete);
+    database.SaveChanges();
+
+    return Results.NoContent();
+});
 
 
-
-
-
+//---------------------------------------------------------------------------
 
 app.Run();

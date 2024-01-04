@@ -3,7 +3,6 @@ export const getAppointments = () => {
 }
 
 export const getAppointment = (id) => {
-    console.log(id)
     return fetch(`/api/appointments/${id}`).then((response) => response.json())
 }
 

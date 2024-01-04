@@ -2,10 +2,11 @@
 import { Button, Table } from 'reactstrap'
 import { getAppointments, deleteAppointment } from './AppointmentData'
 import { useState, useEffect } from 'react'
-
-
+import { useNavigate } from 'react-router-dom'
 
 export const AppointmentsList = () => {
+
+    const navigate = useNavigate()
 
     const [appointments, setAppointments] = useState([])
 
@@ -35,16 +36,20 @@ export const AppointmentsList = () => {
                     <th className="px-6 py-3 text-left text-2xl font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                     <th className="px-6 py-3 text-left text-2xl font-medium text-gray-500 uppercase tracking-wider">Stylist</th>
                     <th className="px-6 py-3 text-left text-2xl font-medium text-gray-500 uppercase tracking-wider">Appointment Time</th>
+                    <th className="px-6 py-3 text-left text-2xl font-medium text-gray-500 uppercase tracking-wider">Services</th>
                     <th className="px-6 py-3 text-left text-2xl font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
                 {appointments.map((appointment, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
+                    <tr onClick={() => navigate(`${appointment.id}`)} key={index} className="hover:bg-gray-50 cursor-pointer ">
                         <th className="px-6 py-4 whitespace-nowrap">{index + 1}</th>
                         <td className="px-6 py-4 whitespace-nowrap">{`${appointment.customer.firstName} ${appointment.customer.lastName}`}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{`${appointment.stylist.firstName} ${appointment.stylist.lastName}`}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{formatDate(appointment.appointmentTime)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{appointment.appointmentDetails.map((ad) => (
+                            ad.service.serviceName
+                        )).join(" | ")}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                             {appointment.isCancelled ? "Cancelled" : <Button onClick={()=>handleDeleteAppointment(appointment.id)} color="danger">Cancel</Button>}
                         </td>

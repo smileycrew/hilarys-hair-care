@@ -5,3 +5,10 @@ export const addAppointmentDetail = (appointmentDetailObj) => {
         body: JSON.stringify(appointmentDetailObj)
     })
 }
+
+export const deleteAppointmentDetail = (id) => {
+    console.log(id)
+    return fetch(`/api/appointmentdetails/${id}`, {
+        method: "DELETE"
+    })
+}
